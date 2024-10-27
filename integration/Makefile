@@ -5,7 +5,7 @@ test:
 	sleep 3
 
 	# Run the tests
-	set -o pipefail; go test -v ./integration_test.go | tee /dev/stderr; test_exit_code=$$?
+	bash -c "set -o pipefail; go test -v ./integration_test.go | tee /dev/stderr"; test_exit_code=$$?
 
 	# Stop the containers
 	docker compose down --volumes --remove-orphans

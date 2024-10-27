@@ -7,6 +7,10 @@ all: build
 build:
 	go build -o $(BUILD_DIR) ./...
 
+.PHONY: docker
+docker:
+	docker build -f docker/Dockerfile -t obfsproxy:latest .
+
 .PHONY: test
 test:
 	go test ./...

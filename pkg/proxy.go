@@ -4,17 +4,22 @@ import (
 	"io"
 	"log"
 	"net"
+
+	"github.com/askolesov/obfsproxy/pkg/codec"
 )
 
 type Proxy struct {
 	ListenAddr string
 	TargetAddr string
+
+	Transformer codec.Transformer
 }
 
-func NewProxy(listenAddr, targetAddr string) *Proxy {
+func NewProxy(listenAddr, targetAddr string, transformer codec.Transformer) *Proxy {
 	return &Proxy{
-		ListenAddr: listenAddr,
-		TargetAddr: targetAddr,
+		ListenAddr:  listenAddr,
+		TargetAddr:  targetAddr,
+		Transformer: transformer,
 	}
 }
 
@@ -62,12 +67,11 @@ func (p *Proxy) proxy(dst, src net.Conn) {
 			return
 		}
 
-		// Invert bytes
-		for i := 0; i < n; i++ {
-			buf[i] = ^buf[i]
-		}
+		buf = buf[:n]
 
-		_, err = dst.Write(buf[:n])
+		buf = p.Transformer(buf)
+
+		_, err = dst.Write(buf)
 		if err != nil {
 			log.Printf("Error writing to connection: %v", err)
 			return

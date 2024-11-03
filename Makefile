@@ -9,7 +9,7 @@ build:
 
 .PHONY: docker
 docker:
-	docker build -f docker/Dockerfile -t obfsproxy:latest .
+	docker build -f docker/Dockerfile -t obfsproxy .
 
 .PHONY: test
 test:

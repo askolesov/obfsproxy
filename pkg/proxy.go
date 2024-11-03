@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 
 	"github.com/askolesov/obfsproxy/pkg/codec"
 )
@@ -40,6 +41,7 @@ func (p *Proxy) Start() error {
 			log.Printf("Error accepting connection: %v", err)
 			continue
 		}
+		log.Printf("Accepted connection from %s", clientConn.RemoteAddr())
 		go p.handleConnection(clientConn)
 	}
 }
@@ -52,15 +54,33 @@ func (p *Proxy) handleConnection(clientConn net.Conn) {
 		log.Printf("Error connecting to target: %v", err)
 		return
 	}
+	log.Printf("Connected to target %s", targetConn.RemoteAddr())
 	defer targetConn.Close()
 
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
 	if p.IsServer {
-		go p.proxy(clientConn, targetConn, p.Codec.NewDecoder())
-		p.proxy(targetConn, clientConn, p.Codec.NewEncoder())
+		go func() {
+			defer wg.Done()
+			p.proxy(clientConn, targetConn, p.Codec.NewDecoder())
+		}()
+		go func() {
+			defer wg.Done()
+			p.proxy(targetConn, clientConn, p.Codec.NewEncoder())
+		}()
 	} else {
-		go p.proxy(clientConn, targetConn, p.Codec.NewEncoder())
-		p.proxy(targetConn, clientConn, p.Codec.NewDecoder())
+		go func() {
+			defer wg.Done()
+			p.proxy(clientConn, targetConn, p.Codec.NewEncoder())
+		}()
+		go func() {
+			defer wg.Done()
+			p.proxy(targetConn, clientConn, p.Codec.NewDecoder())
+		}()
 	}
+
+	wg.Wait()
 }
 
 func (p *Proxy) proxy(src, dst net.Conn, t codec.Transformer) {

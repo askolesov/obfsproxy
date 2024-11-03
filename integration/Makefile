@@ -1,3 +1,6 @@
+.PHONY: all
+all: test
+
 .PHONY: test
 test:
 	# Start the containers

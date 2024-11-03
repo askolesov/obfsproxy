@@ -63,7 +63,7 @@ func (p *Proxy) handleConnection(clientConn net.Conn) {
 	}
 }
 
-func (p *Proxy) proxy(dst, src net.Conn, t codec.Transformer) {
+func (p *Proxy) proxy(src, dst net.Conn, t codec.Transformer) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := src.Read(buf)

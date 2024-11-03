@@ -1,21 +1,21 @@
 services:
-  obfuscating-proxy: # server
+  proxy-client:
     build:
       context: ./../
       dockerfile: ./docker/Dockerfile
-    command: ["obfsproxy", "-l", "0.0.0.0:8080", "-t", "deobfuscating-proxy:8081", "-k", "test-key", "-r", "50", "-s"]
+    command: ["obfsproxy", "-l", "0.0.0.0:8080", "-t", "proxy-server:8081", "-k", "test-key", "-r", "50", "-c"]
     ports:
       - "8080:8080"
 
-  deobfuscating-proxy: # client
+  proxy-server:
     build:
       context: ./../
       dockerfile: ./docker/Dockerfile
-    command: ["obfsproxy", "-l", "0.0.0.0:8081", "-t", "mock-server:80", "-k", "test-key", "-r", "50", "-c"]
+    command: ["obfsproxy", "-l", "0.0.0.0:8081", "-t", "mock-server:80", "-k", "test-key", "-r", "50", "-s"]
     ports:
       - "8081:8081"
 
-  mock-server: # target
+  mock-server:
     image: nginx:alpine
     volumes:
       - ./mock-server.conf:/etc/nginx/conf.d/default.conf

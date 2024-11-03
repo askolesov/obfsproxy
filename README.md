@@ -2,6 +2,16 @@
 
 obfsproxy is a simple obfuscating proxy designed to provide a layer of obfuscation for network traffic. It works by applying multiple transformations to the data passing through it, making it harder for network monitors to identify the content of the communication.
 
+```mermaid
+graph LR
+    client[VPN Client] -->|Original Traffic| proxy1[Proxy Client\nobfsproxy]
+    proxy1 -->|Obfuscated Traffic| proxy2[Proxy Server\nobfsproxy]
+    proxy2 -->|Original Traffic| server[VPN Server]
+    
+    style proxy1 fill:#f9f,stroke:#333
+    style proxy2 fill:#f9f,stroke:#333
+```
+
 ## Features
 
 - Multiple obfuscation methods:

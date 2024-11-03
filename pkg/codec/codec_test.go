@@ -16,9 +16,15 @@ func must[T any](v T, err error) T {
 
 func TestCodecs(t *testing.T) {
 	codecs := map[string]Codec{
+		"none":     NewNone(),
 		"inverter": NewInverter(),
 		"xorer":    must(NewXorer([]byte("test-key"))),
 		"injector": must(NewInjector(42, 500)),
+		"chain": must(NewChain([]Codec{
+			NewInverter(),
+			must(NewXorer([]byte("chain-key"))),
+			must(NewInjector(42, 100)),
+		})),
 	}
 
 	tests := []struct {
@@ -91,8 +97,8 @@ func TestCodecs(t *testing.T) {
 					decodedChunks := transformByChunks(chunkDecoder, encodedChunks, tt.decodeChunkSize)
 					require.Equal(t, tt.input, decodedChunks, "chunked encode/decode failed")
 
-					// Verify that encoded data is different from input (except for empty input and injector with low rate)
-					if len(tt.input) > 0 && codecName != "injector" {
+					// Verify that encoded data is different from input (except for empty input and stateful codecs)
+					if len(tt.input) > 0 && codecName != "injector" && codecName != "none" {
 						require.NotEqual(t, tt.input, encoded, "encoded data should be different from input")
 					}
 

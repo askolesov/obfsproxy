@@ -57,13 +57,8 @@ func main() {
 				return fmt.Errorf("failed to create codec chain: %w", err)
 			}
 
-			// Create proxy with appropriate transformer
-			var proxy *pkg.Proxy
-			if isServer {
-				proxy = pkg.NewProxy(listenAddr, targetAddr, chain.NewDecoder())
-			} else {
-				proxy = pkg.NewProxy(listenAddr, targetAddr, chain.NewEncoder())
-			}
+			// Create proxy with codec
+			proxy := pkg.NewProxy(listenAddr, targetAddr, isServer, chain)
 
 			if err := proxy.Start(); err != nil {
 				fmt.Printf("Error: %v\n", err)

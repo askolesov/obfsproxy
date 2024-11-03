@@ -12,14 +12,16 @@ type Proxy struct {
 	ListenAddr string
 	TargetAddr string
 
-	Transformer codec.Transformer
+	IsServer bool
+	Codec    codec.Codec
 }
 
-func NewProxy(listenAddr, targetAddr string, transformer codec.Transformer) *Proxy {
+func NewProxy(listenAddr, targetAddr string, isServer bool, codec codec.Codec) *Proxy {
 	return &Proxy{
-		ListenAddr:  listenAddr,
-		TargetAddr:  targetAddr,
-		Transformer: transformer,
+		ListenAddr: listenAddr,
+		TargetAddr: targetAddr,
+		IsServer:   isServer,
+		Codec:      codec,
 	}
 }
 
@@ -52,11 +54,16 @@ func (p *Proxy) handleConnection(clientConn net.Conn) {
 	}
 	defer targetConn.Close()
 
-	go p.proxy(clientConn, targetConn)
-	p.proxy(targetConn, clientConn)
+	if p.IsServer {
+		go p.proxy(clientConn, targetConn, p.Codec.NewDecoder())
+		p.proxy(targetConn, clientConn, p.Codec.NewEncoder())
+	} else {
+		go p.proxy(clientConn, targetConn, p.Codec.NewEncoder())
+		p.proxy(targetConn, clientConn, p.Codec.NewDecoder())
+	}
 }
 
-func (p *Proxy) proxy(dst, src net.Conn) {
+func (p *Proxy) proxy(dst, src net.Conn, t codec.Transformer) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := src.Read(buf)
@@ -69,7 +76,7 @@ func (p *Proxy) proxy(dst, src net.Conn) {
 
 		buf = buf[:n]
 
-		buf = p.Transformer(buf)
+		buf = t(buf)
 
 		_, err = dst.Write(buf)
 		if err != nil {

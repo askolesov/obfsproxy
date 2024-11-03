@@ -24,11 +24,22 @@ func main() {
 		Short: "A simple obfuscating proxy",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Validate flags
+			if key == "" {
+				return fmt.Errorf("key is required")
+			}
+
 			if isServer && isClient {
 				return fmt.Errorf("cannot specify both server (-s) and client (-c) modes")
 			}
 			if !isServer && !isClient {
 				isClient = true
+			}
+
+			if isClient {
+				fmt.Println("Running in client mode")
+			}
+			if isServer {
+				fmt.Println("Running in server mode")
 			}
 
 			// Calculate seed from key
@@ -74,8 +85,8 @@ func main() {
 	rootCmd.Flags().StringVarP(&targetAddr, "target", "t", "localhost:80", "Address to forward to")
 	rootCmd.Flags().BoolVarP(&isServer, "server", "s", false, "Run in server mode")
 	rootCmd.Flags().BoolVarP(&isClient, "client", "c", false, "Run in client mode")
-	rootCmd.Flags().StringVarP(&key, "key", "k", "", "Encryption key (required)")
-	rootCmd.Flags().IntVarP(&redundancy, "redundancy", "r", 50, "Redundancy level (0-1000)")
+	rootCmd.Flags().StringVarP(&key, "key", "k", "", "Obfuscation key (required)")
+	rootCmd.Flags().IntVarP(&redundancy, "redundancy", "r", 20, "Redundancy level (0-1000)")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -4,12 +4,12 @@ obfsproxy is a simple obfuscating proxy designed to provide a layer of obfuscati
 
 ```mermaid
 graph LR
-    client[VPN Client] -->|Original Traffic| proxy1[Proxy Client\nobfsproxy]
-    proxy1 -->|Obfuscated Traffic| proxy2[Proxy Server\nobfsproxy]
+    client[VPN Client] -->|Original Traffic| proxy1[obfsproxy client]
+    proxy1 -->|Obfuscated Traffic| proxy2[obfsproxy server]
     proxy2 -->|Original Traffic| server[VPN Server]
     
-    style proxy1 fill:#f9f,stroke:#333
-    style proxy2 fill:#f9f,stroke:#333
+    style proxy1 fill:#ddd,stroke:#333
+    style proxy2 fill:#ddd,stroke:#333
 ```
 
 ## Features

@@ -67,20 +67,20 @@ func (p *Proxy) proxy(dst, src net.Conn, t codec.Transformer) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := src.Read(buf)
+		if n > 0 {
+			data := buf[:n]
+			data = t(data)
+
+			_, writeErr := dst.Write(data)
+			if writeErr != nil {
+				log.Printf("Error writing to connection: %v", writeErr)
+				return
+			}
+		}
 		if err != nil {
 			if err != io.EOF {
 				log.Printf("Error reading from connection: %v", err)
 			}
-			return
-		}
-
-		buf = buf[:n]
-
-		buf = t(buf)
-
-		_, err = dst.Write(buf)
-		if err != nil {
-			log.Printf("Error writing to connection: %v", err)
 			return
 		}
 	}

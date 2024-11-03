@@ -20,16 +20,16 @@ func TestInjector(t *testing.T) {
 			data: []byte("hello world"),
 		},
 		{
-			name: "full rate",
+			name: "100% rate",
 			seed: 42,
 			rate: 100,
 			data: []byte("test data"),
 		},
 		{
-			name: "partial rate",
+			name: "500% rate",
 			seed: 42,
 			rate: 500,
-			data: []byte("partial injection test"),
+			data: generateRandomBytes(10000000, 42),
 		},
 		{
 			name: "empty input",
@@ -54,26 +54,8 @@ func TestInjector(t *testing.T) {
 			})
 
 			t.Run("Chunked encode/decode", func(t *testing.T) {
-				encodedChunks := make([]byte, 0)
-				for i := 0; i < len(tt.data); i += 2 {
-					end := i + 2
-					if end > len(tt.data) {
-						end = len(tt.data)
-					}
-					chunk := encoder(tt.data[i:end])
-					encodedChunks = append(encodedChunks, chunk...)
-				}
-
-				decodedChunks := make([]byte, 0)
-				for i := 0; i < len(encodedChunks); i += 3 {
-					end := i + 3
-					if end > len(encodedChunks) {
-						end = len(encodedChunks)
-					}
-					chunk := decoder(encodedChunks[i:end])
-					decodedChunks = append(decodedChunks, chunk...)
-				}
-
+				encodedChunks := transformByChunks(encoder, tt.data, 2)
+				decodedChunks := transformByChunks(decoder, encodedChunks, 3)
 				require.Equal(t, tt.data, decodedChunks, "Chunked encode/decode failed")
 			})
 		})

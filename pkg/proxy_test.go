@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/askolesov/obfsproxy/pkg/codec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,8 +28,10 @@ func TestProxy(t *testing.T) {
 		expectedData[i] = ^b // Invert bytes
 	}
 
+	codec := codec.NewInverter()
+
 	// Run proxy in a goroutine
-	go p.proxy(in2, out1)
+	go p.proxy(in2, out1, codec.NewEncoder())
 
 	go func() {
 		// Write test data to server

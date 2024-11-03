@@ -22,3 +22,11 @@ lint:
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
+
+.PHONY: pre-commit
+pre-commit:
+	make lint
+	make test
+	make build
+	make docker
+	cd integration && make test
